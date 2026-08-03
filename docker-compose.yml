@@ -1,5 +1,4 @@
 services:
-  # Container 1: A aplicação Go
   http-server-projeto-korp:
     build:
       context: ./app-go
@@ -9,20 +8,60 @@ services:
       - korp-network
     restart: unless-stopped
 
-  # Container 2: O Nginx (Reverse Proxy)
   nginx:
     image: nginx:1.31.3-alpine
     container_name: nginx-proxy
     ports:
-      - "80:80"            
+      - "80:80"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro 
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
     networks:
       - korp-network
     depends_on:
       - http-server-projeto-korp
     restart: unless-stopped
 
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: prometheus
+    read_only: true
+    tmpfs:
+      - /tmp
+    user: "65534:65534"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - korp-network
+    restart: unless-stopped
+  
+  grafana:
+    image: grafana/grafana:13.1.1
+    container_name: grafana
+    user: "472:472"
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=Senha_Forte_sera_definida_pelo_vault
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    networks:
+      - korp-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
 networks:
   korp-network:
-    driver: bridge      
+    driver: bridge
