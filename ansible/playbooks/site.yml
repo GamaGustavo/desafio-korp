@@ -1,0 +1,91 @@
+---
+# ==========================================
+# PLAYBOOK MESTRE - DESAFIO Korp
+# Um único comando para provisionar TUDO
+# ==========================================
+
+# Importa o hardening base (SSH, UFW, usuários)
+- import_playbook: hardening.yml
+
+# Importa a instalação do Docker
+- import_playbook: docker-setup.yml
+
+# Playbook principal do desafio
+- name: Desafio Korp - Deploy da Aplicação e Monitoramento
+  hosts: korp_target
+  become: yes
+  vars:
+    app_dir: /opt/korp-challenge
+
+  tasks:
+    # ==========================================
+    # FASE 1: Preparação do Diretório
+    # ==========================================
+    - name: Criar diretório base da aplicação
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    # ==========================================
+    # FASE 2: Deploy da Aplicação, Configurações e Limpeza de Estado Inconsistente do Docker
+    # ==========================================
+    - name: Copiar estrutura do projeto para o servidor
+      synchronize:
+        src: "{{ playbook_dir }}/../../"
+        dest: "{{ app_dir }}/"
+        archive: yes
+        delete: yes
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=.gitignore"
+          - "--exclude=ansible"
+          - "--exclude=README.md"
+          - "--exclude=LICENSE"
+
+    - name: Parar e remover containers órfãos existentes
+      community.docker.docker_compose_v2:
+        project_src: "{{ app_dir }}"
+        state: absent
+        remove_orphans: yes
+      ignore_errors: yes  # Ignora erro se o compose não existir ainda
+
+    - name: Limpar imagens e containers não utilizados do Docker
+      command: docker system prune -f --volumes
+      changed_when: true
+
+    # ==========================================
+    # FASE 3: Orquestração com Docker Compose
+    # ==========================================
+    - name: Build e Deploy dos containers via Docker Compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ app_dir }}"
+        build: always
+        state: present
+        remove_orphans: yes
+      register: compose_output
+
+    # ==========================================
+    # FASE 4: Validação e Healthcheck (Obrigatório)
+    # ==========================================
+    - name: Aguardar o Nginx (porta 80) estar respondendo
+      wait_for:
+        port: 80
+        delay: 5
+        timeout: 60
+        state: started
+
+    - name: Validar funcionamento do serviço via HTTP
+      uri:
+        url: "http://localhost:80/projeto-korp"
+        return_content: yes
+        status_code: 200
+      register: api_response
+      retries: 3
+      delay: 5
+
+    - name: Exibir a resposta da API no console (Requisito do Desafio)
+      debug:
+        msg: "✅ SUCESSO! A API retornou: {{ api_response.content }}"

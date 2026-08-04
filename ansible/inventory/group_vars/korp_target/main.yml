@@ -1,0 +1,6 @@
+---
+ansible_user: "gustavo"
+ansible_shell: "/bin/bash"
+ansible_groups:
+  - sudo
+  - adm

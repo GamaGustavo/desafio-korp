@@ -1,0 +1,75 @@
+---
+- name: Hardening e Configuração Base para Ubuntu
+
+  hosts: korp_target
+  become: yes
+  vars:
+    ssh_port: 22
+  tasks:
+
+      
+    - name: Atualizar cache do apt e atualizar pacotes
+      apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes
+        cache_valid_time: 3600
+
+    - name: Instalar dependências necessárias
+      apt:
+        name:
+          - ufw
+          - rsync
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - python3-pip
+        state: present
+
+    - name: Permitir conexões SSH
+      ufw:
+        rule: allow
+        port: "{{ ssh_port }}"
+        proto: tcp
+
+    - name: Habilitar UFW
+      ufw:
+        state: enabled
+        policy: deny
+
+      # 3. Hardening do SSH
+    - name: Configurar parâmetros de segurança do SSHD
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      loop:
+        - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication no' }
+        - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin no' }
+        - { regexp: '^#?X11Forwarding', line: 'X11Forwarding no' }
+      notify: Restart SSH
+
+      # 4. Gestão de Usuários
+    - name: Garantir que o usuário ansible exista e tenha privilégios de sudo
+      user:
+        name: "{{ ansible_user }}"
+        groups: "{{ ansible_groups }}"
+        append: yes
+        shell: "{{ ansible_shell }}"
+        state: present
+
+    - name: Implantar chave pública SSH
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ lookup('file', '~/.ssh/ansible_lab_ed25519.pub') }}"
+        state: present
+
+  handlers:
+    - name: Restart SSH
+      service:
+        name: ssh
+        state: restarted
