@@ -48,7 +48,7 @@ services:
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
       - grafana_data:/var/lib/grafana
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=Senha_Forte_sera_definida_pelo_vault
+      - GF_SECURITY_ADMIN_PASSWORD=Senha_Forte_Deve_Ser_Passada_Por_Vault
       - GF_USERS_ALLOW_SIGN_UP=false
     ports:
       - "3000:3000"

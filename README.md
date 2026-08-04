@@ -103,7 +103,7 @@ O playbook vai:
 
 Após a execução:
 - **API**: `http://<IP_DO_SERVIDOR>/projeto-korp`
-- **Grafana**: `http://<IP_DO_SERVIDOR>:3000` (admin/Senha_Forte_sera_definida_pelo_vault)
+- **Grafana**: `http://<IP_DO_SERVIDOR>:3000` (admin/Senha_Forte_Deve_Ser_Passada_Por_Vault)
 
 ## 🧪 Testes
 
