@@ -153,6 +153,6 @@ Este projeto foi desenvolvido como parte de um desafio técnico para a Korp ERP.
 ## 👤 Autor
 
 Gustavo Avila Gama  
-LinkedIn: [linkedin.com/in/gustavo-avila-gama](https://www.linkedin.com/in/gustavo-avila-gama)  
+LinkedIn: [linkedin.com/in/gustavo-avila-gama-333030132](www.linkedin.com/in/gustavo-avila-gama-333030132)  
 GitHub: [github.com/GamaGustavo](https://github.com/GamaGustavo)
 
