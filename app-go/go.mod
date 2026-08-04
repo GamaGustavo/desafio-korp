@@ -1,4 +1,4 @@
-module korp-app
+module http-server-projeto-korp
 
 go 1.26.5
 

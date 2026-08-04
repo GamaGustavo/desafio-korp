@@ -13,8 +13,8 @@ COPY . .
 
 # CGO_ENABLED=0 gera um binário estático (independe de C libraries no Alpine).
 # -ldflags="-s -w" remove símbolos de debug, diminuindo o tamanho final do binário.
-# -o korp-app define o nome exato do arquivo de saída.
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o korp-app .
+# -o korp_http_requests_total define o nome exato do arquivo de saída.
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o http-server-projeto-korp .
 
 # ==========================================
 # STAGE 2: Runtime (Execução)
@@ -29,11 +29,11 @@ WORKDIR /app
 
 # Copiar APENAS o binário compilado do stage 'builder' para o stage 'runtime'.
 # A imagem final não terá o código fonte, nem o Go, nem as dependências.
-COPY --from=builder /build/korp-app .
+COPY --from=builder /build/http-server-projeto-korp .
 
 # Mudamos para o usuário não-root. A partir daqui, nada roda como root.
 USER appuser
 
 EXPOSE 8080
 
-ENTRYPOINT ["./korp-app"]
+ENTRYPOINT ["./http-server-projeto-korp"]

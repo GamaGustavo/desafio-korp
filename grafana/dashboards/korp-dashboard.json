@@ -64,7 +64,7 @@
                       "group": "prometheus",
                       "kind": "DataQuery",
                       "spec": {
-                        "expr": "up{job=\"korp-app\"}"
+                        "expr": "up{job=\"http-server-projeto-korp\"}"
                       },
                       "version": "v0"
                     },
