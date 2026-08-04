@@ -15,7 +15,7 @@
   hosts: korp_target
   become: yes
   vars:
-    app_dir: /opt/korp-challenge
+    app_dir: /opt/desafio-korp
 
   tasks:
     # ==========================================

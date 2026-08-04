@@ -35,7 +35,7 @@ flowchart TB
 ## 📂 Estrutura do Projeto
 
 ```
-korp-devops-challenge/
+desafio-korp/
 ├── ansible/
 │   ├── inventory/
 │   │   ├── group_vars/
@@ -79,8 +79,8 @@ korp-devops-challenge/
 
 ```bash
 # Clone o repositório
-git clone https://github.com/GamaGustavo/korp-devops-challenge.git
-cd korp-devops-challenge
+git clone https://github.com/GamaGustavo/desafio-korp.git
+cd desafio-korp
 
 # Configure o inventory com o IP do seu servidor
 vim ansible/inventory/hosts.ini
